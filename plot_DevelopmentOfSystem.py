@@ -35,7 +35,7 @@ for folderk in range(len(foldername)):
  if not os.path.isdir(results_dir):
         os.makedirs(results_dir) 
  import function_DevelopmentOfSystem as subf
- import DATA_INPUT_OUTPUT as ip
+ import function_DataInOut as ip
  
  #-------------------------------------------
  print ('>>>>> read data in <<<<<')    
