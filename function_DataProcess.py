@@ -24,11 +24,18 @@ def rate_calculating(data_array,time_array):
     #output= cm /yr
     new_data_array=[0]
     for kk in range(1,len(data_array)):
-        q=(data_array[kk]-data_array[kk-1])/(time_array[kk]-time_array[kk-1])
-        q=q*0.1       
+        q=data_array[kk]/(time_array[kk]-time_array[kk-1])
         new_data_array.append(q)
     return new_data_array
     
+def rate_calculating2(data_array,time_array):
+    #input= km / Myr
+    #output= cm /yr
+    new_data_array=[0]
+    for kk in range(1,len(data_array)):
+        q=(data_array[kk]-data_array[kk-1])/(time_array[kk]-time_array[kk-1])
+        new_data_array.append(q/10)
+    return new_data_array
    
 #calculate magma production rate
 def count_every_timestep(count_time_array,time_array):

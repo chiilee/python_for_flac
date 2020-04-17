@@ -5,7 +5,7 @@ Created on Wed May  8 20:59:09 2019
 @author: chiilee
 """
 import sys
-sys.path.append("/home/chiilee/git-flac/flac/util")
+sys.path.append("/home/chiilee/git-flac_add/flac/util")
 sys.path.append("/home/chiilee/code")
 sys.path.append("/home/chiilee/code/git-code")
 import os
@@ -16,52 +16,92 @@ import matplotlib.pyplot as plt
 #----------------------------
 #          SETTING
 #----------------------------
-inputpath='/home/chiilee/data/oct2019/1022/'
-outputpath='/home/chiilee/TEST/1028-strength'
-foldername=['relarge2']
+inputpath='/home/chiilee/data/feb2020=/stand'
+outputpath='/home/chiilee/Pic/feb_stand'
+#foldername=['lats0.1-']
+'''
+foldername=['lats1-','lats1-0.5','lats1-0.1','lats1-0.01',
+            'lats0.5-1','lats0.5-','lats0.5-0.1','lats0.5-0.01',
+            'lats0.1-1','lats0.1-0.5','lats0.1-','lats0.1-0.01',
+            'lats0.01-1','lats0.01-0.5','lats0.01-0.1','lats0.01-']
+'''   
+foldername=['s1-','s1-0.5','s1-0.1','s1-0.01',
+            's0.5-1','s0.5-','s0.5-0.1','s0.5-0.01',
+            's0.1-1','s0.1-0.5','s0.1-','s0.1-0.01',
+            's0.01-1','s0.01-0.5','s0.01-0.1','s0.01-']
+            
+fv=0.1
+fys=0.1
+vts=600
 
-vts=1  #len(time-1)
-time_length=20
-
+time_length=30
 axis_tick=1
 legend=1
-folderplot=0
+folderplot=1
 
 
 for folderk in range(len(foldername)):
- path = inputpath+foldername[folderk]
+ vts=vts-1
+ path = inputpath+'/'+foldername[folderk]
  os.chdir(path)
- results_dir = os.path.abspath(outputpath+foldername[folderk])
+ results_dir = os.path.abspath(outputpath+'/'+foldername[folderk])
  if not os.path.isdir(results_dir):
         os.makedirs(results_dir) 
  import function_DevelopmentOfSystem as subf
  import function_DataInOut as ip
+ import function_ReadData as rd
+ import function_DataProcess as cd
  
  #-------------------------------------------
+ print (foldername[folderk])
  print ('>>>>> read data in <<<<<')    
  #-------------------------------------------
+ 
+ import flac
+ fl=flac. Flac()
  time=ip.read_data1('D_time',path)
  trench_index=ip.read_data1('D_trench_index',path)
  trench_location=ip.read_data1('D_trench_location',path)
-
-
-
-
- #-----------------------------------------
- print ('>>>>> ploting <<<<<')
- #-----------------------------------------
+ #time=rd.read_time(vts)
+ #trench_index,trench_location=rd.read_trench_location(vts)
+ #trench_retreat_rate=cd.rate_calculating(trench_location,time)
+ #trench_retreat_rate=cd.moving_window_smooth(trench_retreat_rate,15)
+ #trench_retreat_rate=cd.moving_window_smooth(trench_retreat_rate,15)
  
+ meanMORloca=[] 
+ MORtime=[]   
+ if os.path.isfile(path+'/D_time.txt'):
+   time=ip.read_data1('D_time',path)
+   Ltime=ip.read_data1('D_Ltime',path)
+   rx=ip.read_data('D_rifting',path,1)
+   rz=ip.read_data('D_rifting',path,2)
+   rt=ip.read_data('D_rifting',path,3)
+             
+   for kkt in range(len(time)-1):
+       MORloca=[]
+       for kkr in range(len(rt)):
+           if time[kkt] < rt[kkr] and time[kkt+1] >= rt[kkr]:
+               MORloca.append(rx[kkr])
+       if len(MORloca) != 0:
+           meanMORloca.append(trench_location[kkt]-sum(MORloca)/len(MORloca))
+           MORtime.append(time[kkt]) 
+ #-----------------------------------------
+ print ('>>>>> plotting <<<<<')
+ #-----------------------------------------
+ '''
  # =========================
  #     strenght proflie
  # =========================
- strenght,strenght_D,strenght_T=subf.read_strenght(vts,trench_index,1)
+ strenght,strenght_D,strenght_T=subf.read_strenght(vts,trench_index,fv,fys)
  
  fig=plt.figure(figsize=(6,5))
  ax = fig.add_subplot(111)
  
  dot=ax.scatter(strenght_D,strenght_T,c=strenght,s=25,cmap='spectral',vmax=5,vmin=2,linewidths=0)
+ MOR=ax.scatter(meanMORloca,MORtime,c='#ffffff',linewidths=0,s=10)
+
  plt.grid(True)
- plt.xlim((1000,-200))
+ plt.xlim((500,0))
  plt.ylim((0,time_length))
  
  if (axis_tick<1):
@@ -77,10 +117,10 @@ for folderk in range(len(foldername)):
     colorbar.ax.tick_params(labelsize=8)
  if (folderplot >=1):
      plt.text(490,1.5,foldername[folderk])
-
+ 
  plt.savefig(results_dir+'/pic_AccumulatedStrenght'+'.png') 
  
- 
+
  # ==================================
  #     strain rate profile
  # ==================================
@@ -89,6 +129,7 @@ for folderk in range(len(foldername)):
  fig=plt.figure(figsize=(6,5))
  ax = fig.add_subplot(111)
  dot=ax.scatter(strainrate_D,strainrate_T,c=strainrate,s=30,cmap='jet',vmax=-12.5,vmin=-16,linewidths=0)
+ MOR=ax.scatter(meanMORloca,MORtime,c='#000000',linewidths=0,s=10)
  
  plt.grid(True)
  plt.xlim((500,0))
@@ -109,6 +150,7 @@ for folderk in range(len(foldername)):
      plt.text(490,1.5,foldername[folderk])
 
  plt.savefig(results_dir+'/pic_StrainRate'+'.png')
+ 
 
 
  # ============================
@@ -127,7 +169,7 @@ for folderk in range(len(foldername)):
  dot=ax.scatter(phase_D,phase_T,c=phase,s=25,cmap=phase15,vmax=19.5,vmin=0.5,linewidths=0)
 
  plt.grid(True)
- plt.xlim((1000,-200))
+ plt.xlim((500,0))
  plt.ylim((0,time_length))
  
  if (axis_tick<1):
@@ -145,8 +187,8 @@ for folderk in range(len(foldername)):
      plt.text(490,1.5,foldername[folderk])
 
  plt.savefig(results_dir+'/pic_Phase'+'.png') 
- 
- 
+ '''
+ '''
  # =================
  #      topo
  # ================= 
@@ -161,7 +203,7 @@ for folderk in range(len(foldername)):
  dot=ax.scatter(topo_D,topo_T,c=topo,s=25,cmap='gist_ncar',vmax=8,vmin=-4,linewidths=0)
  
  plt.grid(True)
- plt.xlim(1000,-200)
+ plt.xlim(500,0)
  plt.ylim((0,time_length))
  
  if (axis_tick<1):
@@ -210,7 +252,8 @@ for folderk in range(len(foldername)):
      plt.text(490,1.5,foldername[folderk])
 
  plt.savefig(results_dir+'/pic_MeltVol'+'.png') 
- 
+ '''
+
  # ===================================================
  #      location of rifting and partial melting 
  # =================================================== 
@@ -252,7 +295,7 @@ for folderk in range(len(foldername)):
 
  plt.grid(True)
  plt.xlim((-550,-50))
- plt.ylim((0,45))
+ plt.ylim((0,30))
  
  if (axis_tick<1):
     plt.setp(ax.get_xticklabels(), visible=False)

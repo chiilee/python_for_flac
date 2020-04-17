@@ -27,14 +27,16 @@ start_vts=1
 L1=1000
 L2=-200
 
-def read_strenght(model_steps,trench_index,fys):
+def read_strenght(model_steps,trench_index,fv,fys):
 # calculate the cumulative strenght above 50 km
 # cumulative strenght: GPa.m
 
     print ('caulate strenght profile')
+    print ('caulate strenght profile')
     total_stress=[]
     dis=[]
     time=[]
+    total_P=0
     
     L=np.arange(L2,L1,5)
     for step in range(start_vts,model_steps+1):
@@ -45,15 +47,15 @@ def read_strenght(model_steps,trench_index,fys):
         chamber=fl.read_chamber(step)
         vis = fl.read_visc(step)
         strainrate = fl.read_srII(step)
-        pressure = fl.read_pres(step)
-        den= fl.read_density(step)
-        tem = fl.read_temperature(step)
+        den= fl.read_density(step)      
         
         trench_location=xmesh[trench_index[step-1],0]        
         for kk in range (0,z_len):
                 if zmesh[0,kk] > -50:
-                    Z=kk                   
-        for kk1 in range (0,len(L)):            
+                    Z=kk            
+        
+        for kk1 in range (0,len(L)):
+            
             for kk in range(0,x_len):
                 if xmesh[kk,0] < (trench_location-L[kk1]):
                     X=kk        
@@ -64,18 +66,28 @@ def read_strenght(model_steps,trench_index,fys):
                     Pn=den[X,kk]*((zmesh[0,kk-1]-zmesh[0,kk])*1e+3)*9.8
                     total_Pn=total_Pn+Pn
                 stressvis = 2*pow(10,strainrate[X,kk])*pow(10,vis[X,kk])
-                stressy = 4e7 + 0.577* total_Pn
-                if (chamber[X,kk]>0.24):
-                    stressy= stressy*fys
+                stressy = 4e7 + 0.577* total_Pn       
+       
+                if (chamber[X,kk] < 0.07):
+                    ys_down = (fys)*(chamber[X,kk]-0.001)/(0.07-0.001)+1
+                elif (chamber[X,kk] < 0.25):
+                    ys_down = (0-fys)*(chamber[X,kk]-0.07)/(0.25-0.07)+fys
+                else:
+                    ys_down = 0.
+                    
+                stressy= stressy*ys_down
+
                 P=min(stressvis,stressy)
                 if kk>0:
                     total_P=total_P+ P*(zmesh[0,kk-1]-zmesh[0,kk])*1e+3
                 else:
-                    total_P=P
+                    total_P=P            
             
             total_stress.append(math.log10(total_P*1e-9))
             dis.append(L[kk1])
             time.append(fl.time[step])
+            #print(depth,stress,total_stress)
+
 
     return total_stress, dis, time
 

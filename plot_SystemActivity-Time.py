@@ -18,16 +18,21 @@ import function_DataProcess as cd
 #----------------------------
 #          SETTING
 #----------------------------
-inputpath='/home/chiilee/data/apr2019/0422-arc/'
-outputpath='/home/chiilee/TEST/0422-arc'
-foldername=['af100_0.01']
+inputpath='/home/chiilee/data/feb2020=/DG80/'
+outputpath='/home/chiilee/Pic/feb_DG80/'
+foldername=['DG80_0.1-','DG80_0.01-','DG80_0.5-']
+'''
+inputpath='/home/chiilee/data/feb2020/DG80/'
+outputpath='/home/chiilee/Pic/DG80/'       
+foldername=['DG0.01-']
+'''
 
-stop_timing=5
-time_length=40
+stop_timing=0
+time_length=30
 Ltime_length=1200
 
 axis_tick=1
-legend=1
+legend=0
 folderplot=1
 
 
@@ -48,7 +53,10 @@ for folderk in range(len(foldername)):
 
  trench_index=ip.read_data1('D_trench_index',path)
  trench_location=ip.read_data1('D_trench_location',path)
- trench_retreat_rate=ip.read_data1('D_retreat',path)
+ #trench_retreat_rate=ip.read_data1('D_retreat',path)
+ trench_retreat_rate=cd.rate_calculating2(trench_location,time)
+ trench_retreat_rate=cd.moving_window_smooth(trench_retreat_rate,15)
+ trench_retreat_rate=cd.moving_window_smooth(trench_retreat_rate,15)
  subductingV=ip.read_data1('D_subductingV',path)
  dip=ip.read_data1('D_dip100_200',path)
 
@@ -70,9 +78,9 @@ for folderk in range(len(foldername)):
  peri_meltcount=ip.read_data('D_melt_count',path,3)
 
 
-
+ 
  #-----------------------------------------
- print ('>>>>> ploting <<<<<')
+ print ('>>>>> plotting <<<<<')
  #-----------------------------------------
 
  a=[0,10000]
@@ -84,7 +92,8 @@ for folderk in range(len(foldername)):
 
  #==========================================================
  #    subducting rate / trench retreat rate / dip   
- #==========================================================     
+ #========================================================== 
+ '''    
  fig1_1=plt.figure(figsize=(6,3))
  ax = fig1_1.add_subplot(111)
  ax2 = ax.twinx()
@@ -99,7 +108,7 @@ for folderk in range(len(foldername)):
  tick_value,tick_location=cd.tick_function(Ltime,time,Ltime_length,2)
  ax.grid()
  ax.set_xlim(0,Ltime_length)
- ax.set_ylim(-5,15)
+ ax.set_ylim(-5,10)
  ax2.set_ylim(20,75)
  ax3.set_xlim(0,Ltime_length)
  ax3.set_xticks(tick_location)
@@ -123,12 +132,12 @@ for folderk in range(len(foldername)):
     plt.text(20,-4,foldername[folderk])  
  
  plt.savefig(results_dir+'/Lpic1-'+'.png')
-
+ '''
  #-------------------
  fig1_2 = plt.figure(figsize=(6,3))
  ax1 = fig1_2.add_subplot(111)
  ax2 = ax1.twinx()
- ax3 = ax1.twiny()
+ #ax3 = ax1.twiny()
  
  zero = ax1.plot(a,b,"black")
  timing = ax1.plot(a3,b3,"--",color='black',  lw=1)
@@ -141,22 +150,22 @@ for folderk in range(len(foldername)):
  ax1.grid()
  
  ax1.set_xlim(1,time_length)
- ax1.set_ylim(-5,15)
+ ax1.set_ylim(-5,10)
  ax2.set_ylim(20,75)
- ax3.set_xlim(0,time_length)
- ax3.set_xticks(tick_location)
- ax3.set_xticklabels("%.0f" % z for z in tick_value)
+ #ax3.set_xlim(0,time_length)
+ #ax3.set_xticks(tick_location)
+ #ax3.set_xticklabels("%.0f" % z for z in tick_value)
  
  if (axis_tick<1):
     plt.setp(ax1.get_xticklabels(), visible=False)
     plt.setp(ax1.get_yticklabels(), visible=False)
     plt.setp(ax2.get_yticklabels(), visible=False)
-    plt.setp(ax3.get_xticklabels(), visible=False)   
+    #plt.setp(ax3.get_xticklabels(), visible=False)   
  else:
     ax1.set_xlabel("Time (Myrs)")
     ax1.set_ylabel(r"velcoity ($cm/yr$)")
     ax2.set_ylabel(r"dip ($^\circ$)")
-    ax3.set_xlabel(r"Subducting length (100 km)")
+    #ax3.set_xlabel(r"Subducting length (100 km)")
  if (legend >= 1): 
     lines = line1+line2+line3
     labs = [l.get_label() for l in lines]
@@ -169,6 +178,7 @@ for folderk in range(len(foldername)):
  #===================================================
  #        melting & MOR produce rate
  #===================================================
+ '''
  fig2_1=plt.figure(figsize=(6,3))
  ax = fig2_1.add_subplot(111)
  ax2 = ax.twinx()
@@ -208,12 +218,12 @@ for folderk in range(len(foldername)):
     plt.text(20,3,foldername[folderk])
  
  plt.savefig(results_dir+'/Lpic2-'+'.png')
-
+ '''
  #-----------------------------------
  fig2_2=plt.figure(figsize=(6,3))
  ax1 = fig2_2.add_subplot(111)
  ax2 = ax1.twinx()
- ax3 = ax1.twiny()
+ #ax3 = ax1.twiny()
   
  zero = ax1.plot(a,b,"black")
  timing = ax1.plot(a3,b3,"--",color='black',  lw=1)
@@ -228,20 +238,20 @@ for folderk in range(len(foldername)):
  ax1.set_xlim(1,time_length)
  ax1.set_ylim(0,30)
  ax2.set_ylim(0,45)
- ax3.set_xlim(0,time_length)
- ax3.set_xticks(tick_location)
- ax3.set_xticklabels("%.0f" % z for z in tick_value)
+ #ax3.set_xlim(0,time_length)
+ #ax3.set_xticks(tick_location)
+ #ax3.set_xticklabels("%.0f" % z for z in tick_value)
 
  if (axis_tick<1):
     plt.setp(ax1.get_xticklabels(), visible=False)
     plt.setp(ax1.get_yticklabels(), visible=False)
     plt.setp(ax2.get_yticklabels(), visible=False)
-    plt.setp(ax3.get_xticklabels(), visible=False)   
+    #plt.setp(ax3.get_xticklabels(), visible=False)   
  else:
     ax1.set_xlabel("Time (Myrs)")
     ax1.set_ylabel(r"Magma roduce rate (km$^2$/yr)")
     ax2.set_ylabel(r"OC produce rate (km$^2$/yr)")
-    ax3.set_xlabel(r"Subducting length (100 km)")
+    #ax3.set_xlabel(r"Subducting length (100 km)")
  if (legend >= 1): 
     lines = line0+line1+line3+line4#+line4
     labs = [l.get_label() for l in lines]
@@ -254,6 +264,7 @@ for folderk in range(len(foldername)):
  #=============================================================
  #   location of melting markers (distance to the trench)
  #=============================================================
+
  fig4=plt.figure(figsize=(5,4))
  ax = fig4.add_subplot(111)
  
@@ -284,10 +295,11 @@ for folderk in range(len(foldername)):
     plt.text(-390,-235,foldername[folderk])
 
  plt.savefig(results_dir+'/pic4-'+'.png')
-
+ 
  #=================================================================
  #     location of rifting marker (distance to the trench)
  #=================================================================
+ '''
  fig6=plt.figure(figsize=(5,2.5))
  ax = fig6.add_subplot(111)
  
@@ -318,7 +330,7 @@ for folderk in range(len(foldername)):
      plt.text(-590,6,foldername[folderk])
 
  plt.savefig(results_dir+'/pic6-'+'.png')
- 
+ '''
  #------------------------------------------------------
  #fig6-1:location of rifting (absoult location)
  fig6_1=plt.figure(figsize=(5,2.5))

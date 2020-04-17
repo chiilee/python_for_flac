@@ -69,6 +69,7 @@ read data from flac data to which used to draw figures
 the most of function need: related parameters and the last vts number
 the data will be a 1D list: value in each vts (from 1/or started_vts to last vts number)
 '''    
+
 def read_time(model_steps):
 # get the model time list 
 
@@ -80,7 +81,8 @@ def read_time(model_steps):
 
 def read_downgoing_plate_velocity(trench_index,model_steps):
 # get the means of area velocity on the subducting plate beside the trench (W15xD20 grid) 
-   
+
+    print ("record subducting velocity")   
     vel_total=[]
     for step in range(start_vts,model_steps+1):
         vx,vz=fl.read_vel(step)
@@ -88,7 +90,7 @@ def read_downgoing_plate_velocity(trench_index,model_steps):
         total_vx=0
         
         if step<=3:
-            total_vz=0.
+            total_vx=0.
         else:    
             for kk1 in range(min(x_len-2,trench_index[step-1]+10),min(x_len-1,trench_index[step-1]+25)):
                 for kk2 in range(20,40):
@@ -112,21 +114,23 @@ def read_trench_location (model_steps):
         zmesh_surf=zmesh[:,0]
      
         ztmp=1000
-        for s in range (0,len(xmesh_surf)):
-            if step>=20:
-                if zmesh_surf[s]<=ztmp and (Xtmp-50)<xmesh_surf[s] and xmesh_surf[s]<(Xtmp+50):
+
+        if step<=50:
+            for s in range (0,220):
+                if zmesh_surf[s]<=ztmp :
                     xtmp=xmesh_surf[s]
                     ztmp=zmesh_surf[s]
-                    trench_index=s
-            else:
-                if zmesh_surf[s]<=ztmp :
+                    trench_index=s            
+        else:
+            for s in range (0,len(xmesh_surf)):
+                if zmesh_surf[s]<=ztmp and (Xtmp-50)<xmesh_surf[s] and xmesh_surf[s]<(Xtmp+50):
                     xtmp=xmesh_surf[s]
                     ztmp=zmesh_surf[s]
                     trench_index=s
         Xtmp=xtmp
         trench_Xindex.append(trench_index)
         trench_location.append(Xtmp)
-    for kk in range(0,20):
+    for kk in range(0,15):
         trench_Xindex[kk]=trench_Xindex[16]
         trench_location[kk]=trench_location[16]
     return trench_Xindex, trench_location
@@ -135,6 +139,7 @@ def read_trench_location (model_steps):
 def read_subductingL(time,subductingV,trench_retreat_rate):
 # get the subducted length from subduction velcoity and trench retreat rate
 
+    print ("record subducting lenght") 
     timeL=len(time)
     L=[0]
     temp = 0
@@ -148,6 +153,7 @@ def read_subductingL(time,subductingV,trench_retreat_rate):
 def read_backarc_extensionL(time,trench_retreat_rate):
 # the extension lenght of back arc basin = (trench retreat rate)*(time) 
 
+    print ("record extension lenght") 
     timeL=len(time)
     L=[0]
     temp = 0
@@ -167,7 +173,6 @@ def read_slab_dip(model_steps,depth1,depth2):
         xmesh,zmesh=fl.read_mesh(step)
         x_len,z_len=xmesh.shape
         phase=fl.read_phase(step)        
-        zmesh_B=zmesh[0,:]
 
         temp=0 # when here's no slab between depth1 and depth2, both two depth will be shallower 
         depth2_temp=depth2+5
